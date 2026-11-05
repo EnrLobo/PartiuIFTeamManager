@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "./database.types";
 
 /**
  * Cliente do Supabase para uso em componentes que rodam no NAVEGADOR
@@ -6,7 +7,7 @@ import { createBrowserClient } from "@supabase/ssr";
  * os dados é a RLS (segurança por linha) configurada no banco.
  */
 export function createClient() {
-  return createBrowserClient(
+  return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
   );
