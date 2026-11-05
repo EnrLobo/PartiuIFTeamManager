@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/*
+  Paleta oficial do Partiu IF.
+  Para usar nas telas: bg-brand, bg-background, bg-success, bg-danger, text-ink etc.
+
+  Atenção à acessibilidade (contraste):
+  - Sobre o laranja (brand) use texto PRETO (text-ink). Branco sobre laranja não tem contraste suficiente.
+  - Sobre o vermelho (danger) o texto branco funciona bem.
+  - Sobre o verde (success) use texto preto, ou branco só em textos grandes.
+*/
+@theme {
+  --color-brand: #f27405; /* laranja: cor principal, botões e destaques */
+  --color-background: #fafcfd; /* fundo das páginas */
+  --color-success: #359830; /* verde: sucesso, termo assinado */
+  --color-danger: #c90c0f; /* vermelho: erro, desligamento, alertas */
+  --color-ink: #000000; /* preto: textos */
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Foco visível para quem navega pelo teclado (acessibilidade). */
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
