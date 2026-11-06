@@ -76,3 +76,24 @@ A branch principal é a `main`.
 
 - Nunca versionar chaves ou senhas. Use `.env.local` (ignorado pelo Git); o modelo fica em `.env.example`.
 - Dados pessoais dos bolsistas (CPF, contatos, dados bancários) ficam protegidos por perfil de acesso, com RLS no banco.
+
+## Login, perfis e aprovação de contas
+
+- Qualquer pessoa pode se cadastrar em `/cadastro`, mas a conta nasce **pendente**: sem acesso a nenhum dado.
+- Um **administrador** aprova a conta em `/usuarios`, define o perfil (administrador, coordenador de gestão, coordenador pedagógico, apoio administrativo ou apoio de secretaria) e pode bloquear acessos.
+- Só o administrador altera dados; os demais perfis apenas leem informações não sensíveis.
+- A segurança tem três camadas: o `proxy.ts` (porta de entrada), as funções de `src/lib/auth.ts` (checagem em cada página e ação) e a RLS do banco (a trava final).
+
+### Primeiro administrador
+
+Como toda conta nasce pendente, o primeiro administrador é promovido uma única vez direto no banco (SQL Editor do Supabase), depois de criar a conta pelo `/cadastro`:
+
+```sql
+update public.profiles
+set role = 'admin', status = 'ativo'
+where email = 'email-do-primeiro-admin@exemplo.com';
+```
+
+### Configurar no painel do Supabase
+
+Em **Authentication > URL Configuration**, cadastre em _Redirect URLs_ o endereço do site (`http://localhost:3000/**` para testes e a URL da Vercel em produção). Sem isso, o link do e-mail de confirmação não funciona.
