@@ -8,6 +8,7 @@ import {
   type AssignmentStatus,
 } from "@/lib/roles";
 import { StatusBadge } from "@/components/status-badge";
+import { formatTerm } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Bolsistas - Partiu IF" };
 
@@ -21,18 +22,6 @@ function one(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
 }
 
-/** Datas do banco chegam como AAAA-MM-DD; mostramos DD/MM/AAAA sem mexer em fuso. */
-function formatDate(date: string | null): string {
-  if (!date) return "—";
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}`;
-}
-
-function formatTerm(start: string | null, end: string | null): string {
-  if (!start && !end) return "—";
-  return `${formatDate(start)} a ${formatDate(end)}`;
-}
-
 /** Impede que % e _ digitados na busca virem curingas do banco. */
 function escapeLike(text: string): string {
   return text.replace(/[\\%_]/g, (char) => `\\${char}`);
@@ -44,7 +33,8 @@ export default async function ScholarsPage({
   searchParams: SearchParams;
 }) {
   // Todo perfil ativo pode ver a lista. Os dados sensíveis NÃO estão nestas tabelas.
-  await requireActiveUser();
+  const profile = await requireActiveUser();
+  const isAdmin = profile.role === "admin";
 
   const params = await searchParams;
   const q = one(params.q).slice(0, 100);
@@ -72,7 +62,7 @@ export default async function ScholarsPage({
   let query = supabase
     .from("assignments")
     .select(
-      `id, vacancy_title, status, term_start, term_end,
+      `id, scholar_id, vacancy_title, status, term_start, term_end,
        scholars!inner(full_name),
        edital:editais(code),
        position_type:position_types(name),
@@ -117,12 +107,22 @@ export default async function ScholarsPage({
 
   return (
     <div className="max-w-6xl space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Bolsistas</h1>
-        <p className="mt-1 text-black/70">
-          Convocações da equipe do Partiu IF. Use os filtros para encontrar
-          rapidamente quem você procura.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Bolsistas</h1>
+          <p className="mt-1 text-black/70">
+            Convocações da equipe do Partiu IF. Use os filtros para encontrar
+            rapidamente quem você procura.
+          </p>
+        </div>
+        {isAdmin && (
+          <Link
+            href="/bolsistas/novo"
+            className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
+          >
+            Novo bolsista
+          </Link>
+        )}
       </header>
 
       {/* Formulário simples (método GET): os filtros ficam no endereço da página. */}
@@ -272,7 +272,14 @@ export default async function ScholarsPage({
                 key={row.id}
                 className="space-y-2 rounded-2xl border border-black/10 bg-white p-4"
               >
-                <p className="font-semibold">{row.scholars?.full_name}</p>
+                <p className="font-semibold">
+                  <Link
+                    href={`/bolsistas/${row.scholar_id}`}
+                    className="underline"
+                  >
+                    {row.scholars?.full_name}
+                  </Link>
+                </p>
                 <p>{row.vacancy_title}</p>
                 <p className="text-sm text-black/70">
                   {row.position_type?.name} · Edital {row.edital?.code}
@@ -319,7 +326,12 @@ export default async function ScholarsPage({
                 {rows.map((row) => (
                   <tr key={row.id} className="align-top">
                     <th scope="row" className="px-4 py-3 font-semibold">
-                      {row.scholars?.full_name}
+                      <Link
+                        href={`/bolsistas/${row.scholar_id}`}
+                        className="underline"
+                      >
+                        {row.scholars?.full_name}
+                      </Link>
                     </th>
                     <td className="px-4 py-3">
                       {row.vacancy_title}

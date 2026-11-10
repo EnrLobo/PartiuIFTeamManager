@@ -50,5 +50,6 @@ export type NavItem = { href: string; label: string; roles?: UserRole[] };
 export const NAV_ITEMS: NavItem[] = [
   { href: "/painel", label: "Painel" },
   { href: "/bolsistas", label: "Bolsistas" },
+  { href: "/campi", label: "Campi", roles: ["admin"] },
   { href: "/usuarios", label: "Usuários", roles: ["admin"] },
 ];
