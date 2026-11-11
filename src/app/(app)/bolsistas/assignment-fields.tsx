@@ -118,8 +118,7 @@ export function AssignmentFields({
         <SelectField
           label="Responsável pela convocação"
           name="called_by"
-          required={false}
-          placeholder="Sem responsável"
+          placeholder="Escolha o responsável"
           defaultValue={defaults.called_by}
           options={lookups.admins.map((a) => ({ value: a.id, label: a.label }))}
         />

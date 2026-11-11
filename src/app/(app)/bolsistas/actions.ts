@@ -112,19 +112,19 @@ async function parseAssignment(
     }
   }
 
-  // O responsável (se informado) precisa ser um administrador ativo.
-  if (calledBy) {
-    if (!UUID.test(calledBy)) return { error: "Responsável inválido." };
-    const { data: responsible } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", calledBy)
-      .eq("role", "admin")
-      .eq("status", "ativo")
-      .maybeSingle();
-    if (!responsible) {
-      return { error: "O responsável precisa ser um administrador ativo." };
-    }
+  // O responsável pela convocação é obrigatório e precisa ser um administrador ativo.
+  if (!UUID.test(calledBy)) {
+    return { error: "Escolha o responsável pela convocação." };
+  }
+  const { data: responsible } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", calledBy)
+    .eq("role", "admin")
+    .eq("status", "ativo")
+    .maybeSingle();
+  if (!responsible) {
+    return { error: "O responsável precisa ser um administrador ativo." };
   }
 
   return {
@@ -137,7 +137,7 @@ async function parseAssignment(
       status: status as AssignmentStatus,
       email_sent_at: orNull(emailSentAt),
       response_deadline: orNull(responseDeadline),
-      called_by: orNull(calledBy),
+      called_by: calledBy,
       term_start: orNull(termStart),
       term_end: orNull(termEnd),
     },
