@@ -8,6 +8,7 @@ import { ASSIGNMENT_STATUS_LABELS } from "@/lib/roles";
 import { formatCpf } from "@/lib/cpf";
 import { formatDate, formatDateTime, formatTerm } from "@/lib/format";
 import { StatusBadge } from "@/components/status-badge";
+import { StatusForm } from "./status-form";
 
 export const metadata: Metadata = { title: "Ficha do bolsista - Partiu IF" };
 
@@ -111,12 +112,20 @@ export default async function ScholarDetailPage({
           </h1>
         </div>
         {isAdmin && (
-          <Link
-            href={`/bolsistas/${scholar.id}/convocacao/nova`}
-            className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
-          >
-            Adicionar convocação
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/bolsistas/${scholar.id}/editar`}
+              className="rounded-md border border-black/50 bg-white px-4 py-2 font-semibold hover:bg-black/5"
+            >
+              Editar dados
+            </Link>
+            <Link
+              href={`/bolsistas/${scholar.id}/convocacao/nova`}
+              className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
+            >
+              Adicionar convocação
+            </Link>
+          </div>
         )}
       </header>
 
@@ -210,6 +219,22 @@ export default async function ScholarDetailPage({
                     </div>
                   )}
                 </dl>
+
+                {isAdmin && (
+                  <div className="space-y-3 rounded-xl border border-black/10 bg-black/5 p-4">
+                    <StatusForm
+                      assignmentId={assignment.id}
+                      scholarId={scholar.id}
+                      current={assignment.status}
+                    />
+                    <Link
+                      href={`/bolsistas/${scholar.id}/convocacao/${assignment.id}/editar`}
+                      className="inline-block font-semibold underline"
+                    >
+                      Editar convocação
+                    </Link>
+                  </div>
+                )}
 
                 <details>
                   <summary className="cursor-pointer font-semibold">

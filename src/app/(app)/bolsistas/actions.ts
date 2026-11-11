@@ -10,7 +10,8 @@ import { isValidCpf, normalizeCpf } from "@/lib/cpf";
 import { ASSIGNMENT_STATUSES, type AssignmentStatus } from "@/lib/roles";
 
 /**
- * Cadastro de bolsistas e convocações. SOMENTE administrador.
+ * Cadastro, edição e mudança de situação de bolsistas e convocações.
+ * SOMENTE administrador.
  * Toda validação é refeita aqui no servidor (a tela é só uma ajuda) e a RLS
  * do banco é a segunda trava.
  */
@@ -162,6 +163,47 @@ async function undo(
   await supabase.from("scholars").delete().eq("id", scholarId);
 }
 
+/** Valida nome e dados sensíveis do bolsista (iguais no cadastro e na edição). */
+function parseScholarFields(formData: FormData):
+  | { error: string }
+  | {
+      fullName: string;
+      cpf: string;
+      details: Omit<
+        Database["public"]["Tables"]["scholar_sensitive"]["Insert"],
+        "scholar_id" | "cpf"
+      >;
+    } {
+  const fullName = text(formData, "full_name");
+  const cpf = normalizeCpf(text(formData, "cpf"));
+  const email = text(formData, "email");
+
+  if (fullName.length < 3 || fullName.length > 150) {
+    return { error: "Informe o nome completo do bolsista." };
+  }
+  if (!isValidCpf(cpf)) {
+    return { error: "CPF inválido. Confira os números digitados." };
+  }
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+    return { error: "E-mail do bolsista inválido." };
+  }
+
+  return {
+    fullName,
+    cpf,
+    details: {
+      email: orNull(email),
+      phone: orNull(text(formData, "phone")),
+      bank_name: orNull(text(formData, "bank_name")),
+      account_type: orNull(text(formData, "account_type")),
+      agency: orNull(text(formData, "agency")),
+      account_number: orNull(text(formData, "account_number")),
+      pix_key_type: orNull(text(formData, "pix_key_type")),
+      pix_key: orNull(text(formData, "pix_key")),
+    },
+  };
+}
+
 /** Cadastra um bolsista novo junto com a primeira convocação. */
 export async function createScholar(
   _prev: FormState,
@@ -170,19 +212,11 @@ export async function createScholar(
   await requireAdmin();
   const values = valuesFrom(formData);
 
-  const fullName = text(formData, "full_name");
-  const cpf = normalizeCpf(text(formData, "cpf"));
-  const email = text(formData, "email");
-
-  if (fullName.length < 3 || fullName.length > 150) {
-    return { error: "Informe o nome completo do bolsista.", values };
+  const scholarFields = parseScholarFields(formData);
+  if ("error" in scholarFields) {
+    return { error: scholarFields.error, values };
   }
-  if (!isValidCpf(cpf)) {
-    return { error: "CPF inválido. Confira os números digitados.", values };
-  }
-  if (email && !/^\S+@\S+\.\S+$/.test(email)) {
-    return { error: "E-mail do bolsista inválido.", values };
-  }
+  const { fullName, cpf, details } = scholarFields;
 
   const supabase = await createClient();
   const parsed = await parseAssignment(formData, supabase);
@@ -210,18 +244,7 @@ export async function createScholar(
 
   const { error: sensitiveError } = await supabase
     .from("scholar_sensitive")
-    .insert({
-      scholar_id: scholar.id,
-      cpf,
-      email: orNull(email),
-      phone: orNull(text(formData, "phone")),
-      bank_name: orNull(text(formData, "bank_name")),
-      account_type: orNull(text(formData, "account_type")),
-      agency: orNull(text(formData, "agency")),
-      account_number: orNull(text(formData, "account_number")),
-      pix_key_type: orNull(text(formData, "pix_key_type")),
-      pix_key: orNull(text(formData, "pix_key")),
-    });
+    .insert({ scholar_id: scholar.id, cpf, ...details });
   if (sensitiveError) {
     await undo(supabase, scholar.id);
     return {
@@ -299,4 +322,171 @@ export async function addAssignment(
   revalidatePath("/bolsistas");
   revalidatePath(`/bolsistas/${scholarId}`);
   redirect(`/bolsistas/${scholarId}`);
+}
+
+/** Edita o nome e os dados sensíveis de um bolsista. */
+export async function updateScholar(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const values = valuesFrom(formData);
+
+  const scholarId = text(formData, "scholar_id");
+  if (!UUID.test(scholarId)) return { error: "Bolsista inválido.", values };
+
+  const fields = parseScholarFields(formData);
+  if ("error" in fields) return { error: fields.error, values };
+
+  const supabase = await createClient();
+
+  // O CPF não pode pertencer a outro bolsista.
+  const { data: other } = await supabase
+    .from("scholar_sensitive")
+    .select("scholar_id")
+    .eq("cpf", fields.cpf)
+    .neq("scholar_id", scholarId)
+    .maybeSingle();
+  if (other) {
+    return {
+      error: CPF_EXISTS,
+      values: { ...values, existing_id: other.scholar_id },
+    };
+  }
+
+  const { error: sensitiveError } = await supabase
+    .from("scholar_sensitive")
+    .upsert(
+      { scholar_id: scholarId, cpf: fields.cpf, ...fields.details },
+      { onConflict: "scholar_id" },
+    );
+  if (sensitiveError) {
+    return {
+      error: sensitiveError.code === "23505" ? CPF_EXISTS : GENERIC_ERROR,
+      values,
+    };
+  }
+
+  const { data: updated, error: nameError } = await supabase
+    .from("scholars")
+    .update({ full_name: fields.fullName })
+    .eq("id", scholarId)
+    .select("id");
+  if (nameError || !updated?.length) {
+    return {
+      error:
+        "Os dados sensíveis foram salvos, mas não foi possível salvar o nome. Tente novamente.",
+      values,
+    };
+  }
+
+  revalidatePath("/bolsistas");
+  revalidatePath(`/bolsistas/${scholarId}`);
+  redirect(`/bolsistas/${scholarId}`);
+}
+
+/**
+ * Edita todos os campos de uma convocação.
+ * Se a situação mudar, o banco grava o histórico sozinho.
+ */
+export async function updateAssignment(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const values = valuesFrom(formData);
+
+  const scholarId = text(formData, "scholar_id");
+  const assignmentId = text(formData, "assignment_id");
+  if (!UUID.test(scholarId) || !UUID.test(assignmentId)) {
+    return { error: "Convocação inválida.", values };
+  }
+
+  const supabase = await createClient();
+  const parsed = await parseAssignment(formData, supabase);
+  if ("error" in parsed) return { error: parsed.error, values };
+
+  const { data: updated, error } = await supabase
+    .from("assignments")
+    .update(parsed.data)
+    .eq("id", assignmentId)
+    .eq("scholar_id", scholarId)
+    .select("id");
+  if (error || !updated?.length) {
+    return {
+      error:
+        error?.code === "23505"
+          ? "Este bolsista já tem uma convocação neste edital."
+          : GENERIC_ERROR,
+      values,
+    };
+  }
+
+  // Observações: com texto, grava ou atualiza; vazio, remove.
+  const { error: notesError } = parsed.notes
+    ? await supabase
+        .from("assignment_notes")
+        .upsert(
+          { assignment_id: assignmentId, notes: parsed.notes },
+          { onConflict: "assignment_id" },
+        )
+    : await supabase
+        .from("assignment_notes")
+        .delete()
+        .eq("assignment_id", assignmentId);
+  if (notesError) {
+    return {
+      error:
+        "A convocação foi salva, mas não foi possível salvar as observações. Tente novamente.",
+      values,
+    };
+  }
+
+  revalidatePath("/bolsistas");
+  revalidatePath(`/bolsistas/${scholarId}`);
+  redirect(`/bolsistas/${scholarId}`);
+}
+
+/** Altera só a situação de uma convocação (atalho da ficha). O histórico é gravado pelo banco. */
+export async function updateAssignmentStatus(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+
+  const scholarId = text(formData, "scholar_id");
+  const assignmentId = text(formData, "assignment_id");
+  const status = text(formData, "status");
+
+  if (!UUID.test(scholarId) || !UUID.test(assignmentId)) {
+    return { error: "Convocação inválida." };
+  }
+  if (!ASSIGNMENT_STATUSES.includes(status as AssignmentStatus)) {
+    return { error: "Escolha uma situação válida." };
+  }
+
+  const supabase = await createClient();
+  const { data: current } = await supabase
+    .from("assignments")
+    .select("status")
+    .eq("id", assignmentId)
+    .eq("scholar_id", scholarId)
+    .maybeSingle();
+  if (!current) return { error: "Convocação não encontrada." };
+
+  if (current.status === status) {
+    return { message: "A situação já era essa. Nada foi alterado." };
+  }
+
+  const { data: updated, error } = await supabase
+    .from("assignments")
+    .update({ status: status as AssignmentStatus })
+    .eq("id", assignmentId)
+    .eq("scholar_id", scholarId)
+    .select("id");
+  if (error || !updated?.length) return { error: GENERIC_ERROR };
+
+  revalidatePath("/bolsistas");
+  revalidatePath(`/bolsistas/${scholarId}`);
+  return { message: "Situação atualizada." };
 }
