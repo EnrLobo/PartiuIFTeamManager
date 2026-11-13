@@ -41,18 +41,40 @@ export default async function DashboardPage() {
           <p className="mt-1 text-4xl font-bold">{pendingCount}</p>
           <Link
             href="/usuarios"
-            className="bg-brand text-ink mt-4 inline-block rounded-md px-4 py-2 font-semibold hover:brightness-95"
+            className="bg-brand-strong hover:bg-brand-dark mt-4 inline-block rounded-md px-4 py-2 font-semibold text-white"
           >
             Gerenciar usuários
           </Link>
         </section>
       )}
 
-      <section className="rounded-2xl border border-black/10 bg-white p-6">
-        <h2 className="text-lg font-semibold">Em construção</h2>
-        <p className="mt-1 text-black/70">
-          Os cadastros de bolsistas, a importação dos formulários e os gráficos
-          de visão geral serão liberados nas próximas etapas.
+      <section
+        aria-labelledby="titulo-atalhos"
+        className="rounded-2xl border border-black/10 bg-white p-6"
+      >
+        <h2 id="titulo-atalhos" className="text-lg font-semibold">
+          Acesso rápido
+        </h2>
+        <ul className="mt-3 flex flex-wrap gap-3">
+          <li>
+            <Link
+              href="/bolsistas"
+              className="inline-block rounded-md border border-black/50 bg-white px-4 py-2 font-semibold hover:bg-black/5"
+            >
+              Ver bolsistas
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/graficos"
+              className="inline-block rounded-md border border-black/50 bg-white px-4 py-2 font-semibold hover:bg-black/5"
+            >
+              Ver gráficos
+            </Link>
+          </li>
+        </ul>
+        <p className="mt-4 text-sm text-black/70">
+          Em breve: importação dos formulários de inscrição.
         </p>
       </section>
     </div>

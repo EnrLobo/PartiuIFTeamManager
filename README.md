@@ -53,13 +53,15 @@ Definidas em `src/app/globals.css` e usadas no Tailwind (`bg-brand`, `bg-success
 
 | Nome       | Cor       | Uso                           |
 | ---------- | --------- | ----------------------------- |
-| brand      | `#f27405` | Cor principal, botões         |
+| brand      | `#f27405` | Laranja da logo: faixas, barras, detalhes |
+| brand-strong | `#c25100` | Botões (texto branco, contraste 4,7:1) |
+| progress   | `#8c8c8c` | Cinza de "em andamento" nos gráficos |
 | background | `#fafcfd` | Fundo das páginas             |
 | success    | `#359830` | Sucesso (ex.: termo assinado) |
 | danger     | `#c90c0f` | Alertas e desligamentos       |
 | ink        | `#000000` | Textos                        |
 
-Dica de acessibilidade: sobre o laranja use texto preto, pois o branco não tem contraste suficiente.
+Dica de acessibilidade: o laranja puro da logo é só para detalhes e gráficos. Em botões use `brand-strong` com texto branco. A tela `/graficos` mostra números agregados (sem dados pessoais) e cada gráfico tem versão em tabela.
 
 ## Padrão de commits
 

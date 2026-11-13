@@ -118,7 +118,7 @@ export default async function ScholarsPage({
         {isAdmin && (
           <Link
             href="/bolsistas/novo"
-            className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
+            className="bg-brand-strong hover:bg-brand-dark rounded-md px-4 py-2 font-semibold text-white"
           >
             Novo bolsista
           </Link>
@@ -224,7 +224,7 @@ export default async function ScholarsPage({
         <div className="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-3">
           <button
             type="submit"
-            className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
+            className="bg-brand-strong hover:bg-brand-dark rounded-md px-4 py-2 font-semibold text-white"
           >
             Filtrar
           </button>

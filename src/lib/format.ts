@@ -10,6 +10,11 @@ export function formatTerm(start: string | null, end: string | null): string {
   return `${formatDate(start)} a ${formatDate(end)}`;
 }
 
+/** Número com separador de milhar no padrão brasileiro (1.234). */
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat("pt-BR").format(value);
+}
+
 /** Data e hora (ex.: histórico de situação), no horário de Brasília. */
 export function formatDateTime(timestamp: string): string {
   return new Date(timestamp).toLocaleString("pt-BR", {

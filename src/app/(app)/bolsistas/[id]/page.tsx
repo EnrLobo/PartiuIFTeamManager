@@ -121,7 +121,7 @@ export default async function ScholarDetailPage({
             </Link>
             <Link
               href={`/bolsistas/${scholar.id}/convocacao/nova`}
-              className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
+              className="bg-brand-strong hover:bg-brand-dark rounded-md px-4 py-2 font-semibold text-white"
             >
               Adicionar convocação
             </Link>

@@ -1,19 +1,27 @@
 @import "tailwindcss";
 
 /*
-  Paleta oficial do Partiu IF.
-  Para usar nas telas: bg-brand, bg-background, bg-success, bg-danger, text-ink etc.
+  Paleta oficial do Partiu IF (as cores vêm da logo).
+  Para usar nas telas: bg-brand, bg-brand-strong, bg-background, bg-success, bg-danger, text-ink etc.
 
-  Atenção à acessibilidade (contraste):
-  - Sobre o laranja (brand) use texto PRETO (text-ink). Branco sobre laranja não tem contraste suficiente.
-  - Sobre o vermelho (danger) o texto branco funciona bem.
-  - Sobre o verde (success) use texto preto, ou branco só em textos grandes.
+  Regras de contraste (acessibilidade), conferidas por cálculo:
+  - Texto de página: preto (ink) sobre branco ou sobre o fundo claro.
+  - Botões laranja: use bg-brand-strong com texto BRANCO (4,7:1). O laranja puro da logo
+    (brand) com texto branco só chega a 2,9:1, então ele fica para detalhes, faixas e
+    barras, nunca para texto.
+  - Evite preto sobre laranja sólido: o contraste é alto, mas o visual fica pesado.
+  - Vermelho (danger) com texto branco: 5,9:1.
+  - Verde (success) é para marcadores e barras. Em texto, use preto.
 */
 @theme {
-  --color-brand: #f27405; /* laranja: cor principal, botões e destaques */
+  --color-brand: #f27405; /* laranja da logo: faixas, barras e ícones (não para texto) */
+  --color-brand-strong: #c25100; /* laranja escuro: botões, com texto branco */
+  --color-brand-dark: #a14100; /* laranja escuro ao passar o mouse */
+  --color-brand-soft: #fff1e4; /* laranja bem claro: fundo do item ativo do menu */
   --color-background: #fafcfd; /* fundo das páginas */
-  --color-success: #359830; /* verde: sucesso, termo assinado */
-  --color-danger: #c90c0f; /* vermelho: erro, desligamento, alertas */
+  --color-success: #359830; /* verde da logo: sucesso, termo assinado */
+  --color-danger: #c90c0f; /* vermelho da logo: erro, desligamento, alertas */
+  --color-progress: #8c8c8c; /* cinza neutro: "em andamento" nos gráficos */
   --color-ink: #000000; /* preto: textos */
 
   --font-sans: var(--font-geist-sans);
@@ -28,6 +36,6 @@ body {
 
 /* Foco visível para quem navega pelo teclado (acessibilidade). */
 :focus-visible {
-  outline: 3px solid var(--color-brand);
+  outline: 3px solid var(--color-brand-strong);
   outline-offset: 2px;
 }

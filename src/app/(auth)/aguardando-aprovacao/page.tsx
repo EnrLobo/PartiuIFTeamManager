@@ -37,7 +37,7 @@ export default async function PendingPage() {
         {!blocked && (
           <a
             href="/aguardando-aprovacao"
-            className="bg-brand text-ink rounded-md px-4 py-2 font-semibold hover:brightness-95"
+            className="bg-brand-strong hover:bg-brand-dark rounded-md px-4 py-2 font-semibold text-white"
           >
             Verificar novamente
           </a>

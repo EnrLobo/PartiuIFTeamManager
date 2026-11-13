@@ -38,18 +38,49 @@ export const ASSIGNMENT_STATUSES = Object.keys(
   ASSIGNMENT_STATUS_LABELS,
 ) as AssignmentStatus[];
 
+/**
+ * Grupos de situação, usados nos gráficos e nas cores dos marcadores.
+ * A ordem do array é a ordem de empilhamento das barras: verde | cinza | vermelho.
+ */
+export type StatusGroup = "assinado" | "andamento" | "encerrado";
+
+export const STATUS_GROUPS: StatusGroup[] = [
+  "assinado",
+  "andamento",
+  "encerrado",
+];
+
+export const STATUS_GROUP_LABELS: Record<StatusGroup, string> = {
+  assinado: "Termo assinado",
+  andamento: "Em andamento",
+  encerrado: "Desligamento ou sem interesse",
+};
+
+/** A qual grupo pertence cada situação da convocação. */
+export const STATUS_GROUP: Record<AssignmentStatus, StatusGroup> = {
+  termo_assinado: "assinado",
+  solicitou_desligamento: "encerrado",
+  nao_manifestou_interesse_convocar_proximo: "encerrado",
+  convocado_aguardando_manifestacao: "andamento",
+  convocacao_pendente: "andamento",
+  manifestou_interesse_enviar_termo: "andamento",
+  aguardando_indicacao_campus: "andamento",
+  aguardando_assinatura_termo: "andamento",
+};
+
 export const ROLES = Object.keys(ROLE_LABELS) as UserRole[];
 export const STATUSES = Object.keys(STATUS_LABELS) as AccountStatus[];
 
 /**
  * Itens do menu lateral. Se "roles" estiver definido, só esses perfis veem o item.
- * Novos itens (Bolsistas, Importação, Gráficos...) entram aqui nas próximas etapas.
+ * Novos itens (Importação...) entram aqui nas próximas etapas.
  */
 export type NavItem = { href: string; label: string; roles?: UserRole[] };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/painel", label: "Painel" },
   { href: "/bolsistas", label: "Bolsistas" },
+  { href: "/graficos", label: "Gráficos" },
   { href: "/campi", label: "Campi", roles: ["admin"] },
   { href: "/usuarios", label: "Usuários", roles: ["admin"] },
 ];

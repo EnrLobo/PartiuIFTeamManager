@@ -23,7 +23,7 @@ export default async function AppLayout({
     <div className="flex min-h-screen flex-col md:flex-row">
       <a
         href="#conteudo"
-        className="bg-brand text-ink sr-only rounded-md px-3 py-2 font-semibold focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+        className="bg-brand-strong sr-only rounded-md px-3 py-2 font-semibold text-white focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
       >
         Ir para o conteúdo
       </a>
