@@ -31,10 +31,16 @@ export default async function CampusesPage() {
       <CampusForm institutions={institutionList} />
 
       <section aria-labelledby="titulo-lista" className="space-y-4">
-        <h2 id="titulo-lista" className="text-lg font-semibold">
-          Campi cadastrados
-        </h2>
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="titulo-lista" className="text-lg font-semibold">
+            Campi cadastrados
+          </h2>
+          <p className="text-sm text-black/70">
+            {campusList.length} campi em {institutionList.length} instituições
+          </p>
+        </div>
+
+        <ul className="grid gap-4 md:grid-cols-2">
           {institutionList.map((institution) => {
             const items = campusList.filter(
               (campus) => campus.institution_id === institution.id,
@@ -42,17 +48,30 @@ export default async function CampusesPage() {
             return (
               <li
                 key={institution.id}
-                className="rounded-2xl border border-black/10 bg-white p-4"
+                className="border-t-brand overflow-hidden rounded-2xl border border-t-4 border-black/10 bg-white"
               >
-                <h3 className="font-semibold">{institution.name}</h3>
+                <div className="flex items-start justify-between gap-3 p-4 pb-2">
+                  <h3 className="text-base leading-snug font-semibold">
+                    {institution.name}
+                  </h3>
+                  {/* Número escrito (não só cor) com a quantidade de campi. */}
+                  <span className="bg-brand-soft shrink-0 rounded-full px-2.5 py-0.5 text-sm font-semibold">
+                    {items.length} {items.length === 1 ? "campus" : "campi"}
+                  </span>
+                </div>
                 {items.length === 0 ? (
-                  <p className="mt-1 text-sm text-black/70">
+                  <p className="px-4 pb-4 text-sm text-black/70">
                     Nenhum campus cadastrado.
                   </p>
                 ) : (
-                  <ul className="mt-2 list-inside list-disc text-sm">
+                  <ul className="flex flex-wrap gap-2 px-4 pb-4">
                     {items.map((campus) => (
-                      <li key={campus.id}>{campus.name}</li>
+                      <li
+                        key={campus.id}
+                        className="bg-background rounded-full border border-black/20 px-3 py-1 text-sm"
+                      >
+                        {campus.name}
+                      </li>
                     ))}
                   </ul>
                 )}
