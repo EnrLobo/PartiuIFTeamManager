@@ -82,5 +82,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/bolsistas", label: "Bolsistas" },
   { href: "/graficos", label: "Gráficos" },
   { href: "/campi", label: "Campi", roles: ["admin"] },
+  { href: "/editais", label: "Editais e vagas", roles: ["admin"] },
   { href: "/usuarios", label: "Usuários", roles: ["admin"] },
 ];
