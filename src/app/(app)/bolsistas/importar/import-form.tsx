@@ -64,7 +64,7 @@ export function ImportForm() {
 }
 
 function Report({ result }: { result: PreviewResult }) {
-  if (result.fatal) {
+  if (result.fatal !== undefined) {
     return (
       <p
         role="alert"

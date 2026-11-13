@@ -41,6 +41,8 @@ export default async function ImportPage() {
           (maiúsculas e acentos não importam). O responsável é o e-mail de um
           administrador ativo. Datas no formato DD/MM/AAAA.
         </p>
+        {/* Download de arquivo: um <a> comum é o correto (o Link do Next é para páginas). */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/bolsistas/importar/modelo"
           className="inline-block rounded-md border border-black/50 bg-white px-4 py-2 font-semibold hover:bg-black/5"
